@@ -155,48 +155,29 @@ class EfficientNet(tf.keras.Model):
                                          stride=1,
                                          expansion_factor=6, k=3, drop_connect_rate=drop_connect_rate)
 
-        # self.conv2 = tf.keras.layers.Conv2D(filters=round_filters(1280, width_coefficient),
-        #                                     kernel_size=(1, 1),
-        #                                     strides=1,
-        #                                     padding="same",
-        #                                     use_bias=False)
-        # self.bn2 = tf.keras.layers.BatchNormalization()
-        #
-        # self.pool = tf.keras.layers.GlobalAveragePooling2D()
-        # self.dropout = tf.keras.layers.Dropout(rate=dropout_rate)
-        # self.fc = tf.keras.layers.Dense(units=NUM_CLASSES)
-
     def call(self, inputs, training=None, mask=None):
+        features = []
         x = self.conv1(inputs)
         x = self.bn1(x, training=training)
         x = tf.nn.swish(x)
 
         x = self.block1(x)
-        print("p1:", x.shape)
         x = self.block2(x)
-        print("p2:", x.shape)
         x = self.block3(x)
-        print("p3:", x.shape)
+        features.append(x)
         x = self.block4(x)
-        print("p4:", x.shape)
+        features.append(x)
         x = self.block5(x)
-        print("p5:", x.shape)
+        features.append(x)
         x = self.block6(x)
-        print("p6:", x.shape)
+        features.append(x)
         x = self.block7(x)
-        print("p7:", x.shape)
+        features.append(x)
 
-        # x = self.conv2(x)
-        # x = self.bn2(x, training=training)
-        # x = tf.nn.swish(x)
-        # x = self.pool(x)
-        # x = self.dropout(x, training=training)
-        # x = self.fc(x)
-
-        return x
+        return features
 
 
-def get_efficient_net(width_coefficient, depth_coefficient, resolution, dropout_rate):
+def get_efficient_net(width_coefficient, depth_coefficient, dropout_rate):
     net = EfficientNet(width_coefficient=width_coefficient,
                        depth_coefficient=depth_coefficient,
                        dropout_rate=dropout_rate)
@@ -205,35 +186,35 @@ def get_efficient_net(width_coefficient, depth_coefficient, resolution, dropout_
 
 
 def efficient_net_b0():
-    return get_efficient_net(1.0, 1.0, 224, 0.2)
+    return get_efficient_net(1.0, 1.0, 0.2)
 
 
 def efficient_net_b1():
-    return get_efficient_net(1.0, 1.1, 240, 0.2)
+    return get_efficient_net(1.0, 1.1, 0.2)
 
 
 def efficient_net_b2():
-    return get_efficient_net(1.1, 1.2, 260, 0.3)
+    return get_efficient_net(1.1, 1.2, 0.3)
 
 
 def efficient_net_b3():
-    return get_efficient_net(1.2, 1.4, 300, 0.3)
+    return get_efficient_net(1.2, 1.4, 0.3)
 
 
 def efficient_net_b4():
-    return get_efficient_net(1.4, 1.8, 380, 0.4)
+    return get_efficient_net(1.4, 1.8, 0.4)
 
 
 def efficient_net_b5():
-    return get_efficient_net(1.6, 2.2, 456, 0.4)
+    return get_efficient_net(1.6, 2.2, 0.4)
 
 
 def efficient_net_b6():
-    return get_efficient_net(1.8, 2.6, 528, 0.5)
+    return get_efficient_net(1.8, 2.6, 0.5)
 
 
 def efficient_net_b7():
-    return get_efficient_net(2.0, 3.1, 600, 0.5)
+    return get_efficient_net(2.0, 3.1, 0.5)
 
 
 
