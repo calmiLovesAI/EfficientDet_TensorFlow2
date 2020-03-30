@@ -6,9 +6,8 @@ class Config:
 
     network_type = "D0"
 
-    # input image
-    image_height = {"D0": 512}
-    image_width = {"D0": 512}
+    # image size: (height, width)
+    image_size = {"D0": (512, 512)}
     image_channels = 3
 
     # bifpn channels
@@ -22,12 +21,8 @@ class Config:
         pass
 
     @classmethod
-    def get_image_height(cls):
-        return cls.image_height[cls.network_type]
-
-    @classmethod
-    def get_image_width(cls):
-        return cls.image_width[cls.network_type]
+    def get_image_size(cls):
+        return cls.image_size[cls.network_type]
 
     @classmethod
     def get_w_bifpn(cls):

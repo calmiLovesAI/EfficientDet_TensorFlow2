@@ -215,10 +215,3 @@ def efficient_net_b6():
 
 def efficient_net_b7():
     return get_efficient_net(2.0, 3.1, 0.5)
-
-
-
-if __name__ == '__main__':
-    inputs = tf.random.normal(shape=(8, 224, 224, 3))
-    model = efficient_net_b0()
-    y = model(inputs, training=True)
