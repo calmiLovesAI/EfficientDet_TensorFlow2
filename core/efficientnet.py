@@ -183,35 +183,3 @@ def get_efficient_net(width_coefficient, depth_coefficient, dropout_rate):
                        dropout_rate=dropout_rate)
 
     return net
-
-
-def efficient_net_b0():
-    return get_efficient_net(1.0, 1.0, 0.2)
-
-
-def efficient_net_b1():
-    return get_efficient_net(1.0, 1.1, 0.2)
-
-
-def efficient_net_b2():
-    return get_efficient_net(1.1, 1.2, 0.3)
-
-
-def efficient_net_b3():
-    return get_efficient_net(1.2, 1.4, 0.3)
-
-
-def efficient_net_b4():
-    return get_efficient_net(1.4, 1.8, 0.4)
-
-
-def efficient_net_b5():
-    return get_efficient_net(1.6, 2.2, 0.4)
-
-
-def efficient_net_b6():
-    return get_efficient_net(1.8, 2.6, 0.5)
-
-
-def efficient_net_b7():
-    return get_efficient_net(2.0, 3.1, 0.5)
