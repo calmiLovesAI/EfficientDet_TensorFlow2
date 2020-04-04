@@ -24,12 +24,24 @@ class Config:
 
     # dataset
     num_classes = 20
+    pascal_voc_root = "./data/datasets/VOCdevkit/VOC2012/"
+    pascal_voc_classes = {"person": 0, "bird": 1, "cat": 2, "cow": 3, "dog": 4,
+                          "horse": 5, "sheep": 6, "aeroplane": 7, "bicycle": 8,
+                          "boat": 9, "bus": 10, "car": 11, "motorbike": 12,
+                          "train": 13, "bottle": 14, "chair": 15, "diningtable": 16,
+                          "pottedplant": 17, "sofa": 18, "tvmonitor": 19}
+    max_boxes_per_image = 20
+    resize_mode = "RESIZE"
+
+    # txt file
+    txt_file_dir = "data.txt"
 
     # anchors
     num_anchor_per_pixel = 9
     ratios = [0.5, 1, 2]
     scales = [2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)]
     downsampling_strides = [8, 16, 16, 32, 32]
+
 
 
     @classmethod
