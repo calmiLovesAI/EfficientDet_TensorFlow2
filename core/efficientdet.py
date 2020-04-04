@@ -1,7 +1,9 @@
 import tensorflow as tf
 from configuration import Config
+from core.anchor import Anchors
 from core.efficientnet import get_efficient_net
 from core.bifpn import BiFPN
+from core.loss import FocalLoss
 from core.prediction_net import BoxClassPredict
 
 
@@ -33,4 +35,13 @@ class EfficientDet(tf.keras.Model):
 class PostProcessing:
     def __init__(self):
         super(PostProcessing, self).__init__()
+        self.anchors = Anchors(scales=Config.scales, ratios=Config.ratios, image_size=Config.image_size)
+        self.loss = FocalLoss()
+
+    def training_procedure(self, efficientdet_ouputs, labels):
+        cls_results, reg_results = efficientdet_ouputs
+        loss_value = self.loss(cls_results, reg_results, self.anchors, labels)
+        return loss_value
+
+    def testing_procedure(self):
         pass

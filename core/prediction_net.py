@@ -34,10 +34,10 @@ class BoxClassPredict(tf.keras.layers.Layer):
         for class_conv in self.class_convs:
             class_feature = class_conv(class_feature)
         box_pred = self.box_head(box_feature)
-        box_pred = tf.reshape(tensor=box_pred, shape=(-1, 4))
+        box_pred = tf.reshape(tensor=box_pred, shape=(box_pred.shape[0], -1, 4))
         class_pred = self.class_head(class_feature)
         class_pred = tf.nn.sigmoid(class_pred)
-        class_pred = tf.reshape(tensor=class_pred, shape=(-1, self.num_classes))
+        class_pred = tf.reshape(tensor=class_pred, shape=(class_pred.shape[0], -1, self.num_classes))
         return box_pred, class_pred
 
     def call(self, inputs, **kwargs):
@@ -47,7 +47,7 @@ class BoxClassPredict(tf.keras.layers.Layer):
             box_pred, class_pred = self.call_single_level(x)
             box_pred_levels.append(box_pred)
             class_pred_levels.append(class_pred)
-        box_preds = tf.concat(values=box_pred_levels, axis=0)
-        class_preds = tf.concat(values=class_pred_levels, axis=0)
+        box_preds = tf.concat(values=box_pred_levels, axis=1)
+        class_preds = tf.concat(values=class_pred_levels, axis=1)
         return tuple([box_preds, class_preds])
 

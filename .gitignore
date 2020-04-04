@@ -1,3 +1,5 @@
 .idea
 __pycache__
 test.py
+/data/datasets/*
+!/data/datasets/README.md
