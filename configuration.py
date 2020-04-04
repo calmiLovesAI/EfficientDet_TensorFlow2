@@ -22,6 +22,15 @@ class Config:
     # box/class layers
     d_class = {"D0": 3}
 
+    # dataset
+    num_classes = 20
+
+    # anchors
+    num_anchor_per_pixel = 9
+    ratios = [0.5, 1, 2]
+    scales = [2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)]
+    downsampling_strides = [8, 16, 16, 32, 32]
+
 
     @classmethod
     def get_image_size(cls):
