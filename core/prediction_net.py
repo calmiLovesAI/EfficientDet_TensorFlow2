@@ -49,6 +49,6 @@ class BoxClassPredict(tf.keras.layers.Layer):
             class_pred_levels.append(class_pred)
         box_preds = tf.concat(values=box_pred_levels, axis=1)
         class_preds = tf.concat(values=class_pred_levels, axis=1)
-        return [box_preds, class_preds]
+        return tuple([box_preds, class_preds])
 
 

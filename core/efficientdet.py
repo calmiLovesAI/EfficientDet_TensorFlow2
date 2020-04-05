@@ -43,8 +43,6 @@ class PostProcessing:
         reg_results, cls_results = efficientdet_ouputs
         cls_loss_value, reg_loss_value = loss(cls_results, reg_results, anchors, labels)
         loss_value = tf.math.reduce_mean(cls_loss_value) + tf.reduce_mean(reg_loss_value)
-        # loss_value = np.mean(cls_loss_value) + np.mean(reg_loss_value)
-        # loss_value = tf.convert_to_tensor(value=loss_value, dtype=tf.dtypes.float32)
         return loss_value
 
     def testing_procedure(self):
