@@ -1,5 +1,4 @@
 import tensorflow as tf
-import numpy as np
 from configuration import Config
 from core.anchor import Anchors
 from core.efficientnet import get_efficient_net
@@ -40,7 +39,7 @@ class PostProcessing:
     def training_procedure(self, efficientdet_ouputs, labels):
         loss = FocalLoss()
         anchors = self.anchors(efficientdet_ouputs)
-        reg_results, cls_results = efficientdet_ouputs
+        reg_results, cls_results = efficientdet_ouputs[..., :4], efficientdet_ouputs[..., 4:]
         cls_loss_value, reg_loss_value = loss(cls_results, reg_results, anchors, labels)
         loss_value = tf.math.reduce_mean(cls_loss_value) + tf.reduce_mean(reg_loss_value)
         return loss_value

@@ -14,7 +14,8 @@ class Config:
     network_type = "D0"
 
     # image size: (height, width)
-    image_size = {"D0": (512, 512)}
+    image_size = {"D0": (512, 512), "D1": (640, 640), "D2": (768, 768), "D3": (896, 896), "D4": (1024, 1024),
+                  "D5": (1280, 1280), "D6": (1408, 1408), "D7": (1536, 1536)}
     image_channels = 3
 
     # efficientnet
@@ -23,11 +24,11 @@ class Config:
     dropout_rate = {"D0": 0.2, "D1": 0.2, "D2": 0.3, "D3": 0.3, "D4": 0.4, "D5": 0.4, "D6": 0.5, "D7": 0.5}
 
     # bifpn channels
-    w_bifpn = {"D0": 64}
+    w_bifpn = {"D0": 64, "D1": 88, "D2": 112, "D3": 160, "D4": 224, "D5": 288, "D6": 384, "D7": 384}
     # bifpn layers
-    d_bifpn = {"D0": 2}
+    d_bifpn = {"D0": 2, "D1": 3, "D2": 4, "D3": 5, "D4": 6, "D5": 7, "D6": 8, "D7": 8}
     # box/class layers
-    d_class = {"D0": 3}
+    d_class = {"D0": 3, "D1": 3, "D2": 3, "D3": 4, "D4": 4, "D5": 4, "D6": 5, "D7": 5}
 
     # dataset
     num_classes = 20
