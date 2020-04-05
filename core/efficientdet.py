@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 from configuration import Config
 from core.anchor import Anchors
 from core.efficientnet import get_efficient_net
@@ -35,12 +36,14 @@ class EfficientDet(tf.keras.Model):
 class PostProcessing:
     def __init__(self):
         super(PostProcessing, self).__init__()
-        self.anchors = Anchors(scales=Config.scales, ratios=Config.ratios, image_size=Config.image_size)
+        self.anchors = Anchors(scales=Config.scales, ratios=Config.ratios, image_size=Config.get_image_size())
         self.loss = FocalLoss()
 
     def training_procedure(self, efficientdet_ouputs, labels):
-        cls_results, reg_results = efficientdet_ouputs
-        loss_value = self.loss(cls_results, reg_results, self.anchors, labels)
+        anchors = self.anchors(efficientdet_ouputs)
+        reg_results, cls_results = efficientdet_ouputs
+        cls_loss_value, reg_loss_value = self.loss(cls_results, reg_results, anchors, labels)
+        loss_value = np.mean(cls_loss_value) + np.mean(reg_loss_value)
         return loss_value
 
     def testing_procedure(self):

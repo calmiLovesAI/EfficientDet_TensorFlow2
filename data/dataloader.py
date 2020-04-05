@@ -10,7 +10,7 @@ class DetectionDataset:
         self.batch_size = Config.batch_size
 
     @staticmethod
-    def get_length_of_dataset(dataset):
+    def __get_length_of_dataset(dataset):
         length = 0
         for _ in dataset:
             length += 1
@@ -18,7 +18,7 @@ class DetectionDataset:
 
     def generate_datatset(self):
         dataset = tf.data.TextLineDataset(filenames=self.txt_file)
-        length_of_dataset = DetectionDataset.get_length_of_dataset(dataset)
+        length_of_dataset = DetectionDataset.__get_length_of_dataset(dataset)
         train_dataset = dataset.batch(batch_size=self.batch_size)
         return train_dataset, length_of_dataset
 
