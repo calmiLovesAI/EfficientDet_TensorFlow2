@@ -7,7 +7,8 @@ from configuration import Config
 
 
 def print_model_summary(network):
-    network.build(input_shape=(None, Config.get_image_size()[0], Config.get_image_size()[1], Config.image_channels))
+    sample_inputs = tf.random.normal(shape=(Config.batch_size, Config.get_image_size()[0], Config.get_image_size()[1], Config.image_channels))
+    sample_outputs = network(sample_inputs, training=True)
     network.summary()
 
 
@@ -26,10 +27,11 @@ if __name__ == '__main__':
 
     # model
     efficientdet = EfficientDet()
-    # print_model_summary(efficientdet)
+    print_model_summary(efficientdet)
 
+    load_weights_from_epoch = Config.load_weights_from_epoch
     if Config.load_weights_before_training:
-        efficientdet.load_weights(filepath=Config.save_model_dir+"epoch-{}".format(Config.load_weights_from_epoch))
+        efficientdet.load_weights(filepath=Config.save_model_dir+"epoch-{}".format(load_weights_from_epoch))
         print("Successfully load weights!")
     else:
         load_weights_from_epoch = -1
@@ -54,7 +56,7 @@ if __name__ == '__main__':
         optimizer.apply_gradients(grads_and_vars=zip(gradients, efficientdet.trainable_variables))
         loss_metric.update_state(values=loss_value)
 
-    for epoch in range(Config.load_weights_from_epoch + 1, Config.epochs):
+    for epoch in range(load_weights_from_epoch + 1, Config.epochs):
         for step, batch_data in enumerate(train_data):
             images, labels = data_loader.read_batch_data(batch_data)
             train_step(images, labels)
