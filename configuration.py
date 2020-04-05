@@ -3,6 +3,13 @@
 class Config:
     epochs = 50
     batch_size = 8
+    learning_rate_decay_epochs = 20
+
+    # save model
+    save_model_dir = "saved_model/"
+    load_weights_before_training = False
+    load_weights_from_epoch = 0
+    save_frequency = 5
 
     network_type = "D0"
 
@@ -42,6 +49,9 @@ class Config:
     scales = [2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)]
     downsampling_strides = [8, 16, 16, 32, 32]
 
+    # focal loss
+    alpha = 0.25
+    gamma = 2.0
 
 
     @classmethod

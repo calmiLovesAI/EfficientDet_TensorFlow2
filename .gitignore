@@ -4,3 +4,6 @@ test.py
 /data/datasets/*
 !/data/datasets/README.md
 data.txt
+/saved_model/*
+!/saved_model/README.md
+/core/loss_outdated.py

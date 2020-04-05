@@ -35,15 +35,16 @@ class EfficientDet(tf.keras.Model):
 
 class PostProcessing:
     def __init__(self):
-        super(PostProcessing, self).__init__()
         self.anchors = Anchors(scales=Config.scales, ratios=Config.ratios, image_size=Config.get_image_size())
-        self.loss = FocalLoss()
 
     def training_procedure(self, efficientdet_ouputs, labels):
+        loss = FocalLoss()
         anchors = self.anchors(efficientdet_ouputs)
         reg_results, cls_results = efficientdet_ouputs
-        cls_loss_value, reg_loss_value = self.loss(cls_results, reg_results, anchors, labels)
-        loss_value = np.mean(cls_loss_value) + np.mean(reg_loss_value)
+        cls_loss_value, reg_loss_value = loss(cls_results, reg_results, anchors, labels)
+        loss_value = tf.math.reduce_mean(cls_loss_value) + tf.reduce_mean(reg_loss_value)
+        # loss_value = np.mean(cls_loss_value) + np.mean(reg_loss_value)
+        # loss_value = tf.convert_to_tensor(value=loss_value, dtype=tf.dtypes.float32)
         return loss_value
 
     def testing_procedure(self):

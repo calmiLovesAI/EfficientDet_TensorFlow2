@@ -1,12 +1,15 @@
+import tensorflow as tf
 import numpy as np
 
 from utils.iou import IOU
+from configuration import Config
+from utils.tools import item_assignment
 
 
 class FocalLoss:
     def __init__(self):
-        self.alpha = 0.25
-        self.gamma = 2.0
+        self.alpha = Config.alpha
+        self.gamma = Config.gamma
 
     def __call__(self, cls_results, reg_results, anchors, labels):
         assert cls_results.shape[0] == reg_results.shape[0]
@@ -22,45 +25,55 @@ class FocalLoss:
         anchor_center_y = anchor[:, 1] + 0.5 * anchor_heights
 
         for n in range(batch_size):
-            class_result = cls_results[n, :, :].numpy()
-            reg_result = reg_results[n, :, :].numpy()
+            class_result = cls_results[n, :, :]
+            reg_result = reg_results[n, :, :]
 
             box_annotation = labels[n, :, :]
             # Filter out the extra padding boxes.
             box_annotation = box_annotation[box_annotation[:, 4] != -1]
 
             if box_annotation.shape[0] == 0:
-                cls_loss_list.append(np.array(0, dtype=np.float32))
-                reg_loss_list.append(np.array(0, dtype=np.float32))
+                cls_loss_list.append(tf.constant(0, dtype=tf.dtypes.float32))
+                reg_loss_list.append(tf.constant(0, dtype=tf.dtypes.float32))
                 continue
 
-            class_result = np.clip(a=class_result, a_min=1e-4, a_max=1.0 - 1e-4)
+            class_result = tf.clip_by_value(t=class_result, clip_value_min=1e-4, clip_value_max=1.0 - 1e-4)
 
             iou_value = IOU(box_1=anchor, box_2=box_annotation[:, :4]).calculate_iou()
-            iou_max = np.max(iou_value, axis=1)
-            iou_argmax = np.argmax(iou_value, axis=1)
+            iou_max = tf.math.reduce_max(iou_value, axis=1)
+            iou_argmax = tf.math.argmax(iou_value, axis=1)
 
-            targets = np.ones_like(class_result)
-            targets[np.less(iou_max, 0.4), :] = 0
+            targets = tf.ones_like(class_result) * -1
+            targets = item_assignment(input_tensor=targets,
+                                      boolean_mask=tf.math.less(iou_max, 0.4),
+                                      value=0,
+                                      axes=[1])
 
-            positive_indices = np.greater(iou_max, 0.5)
-            num_positive_anchors = np.sum(positive_indices)
+            positive_indices = tf.math.greater(iou_max, 0.5)
+            num_positive_anchors = tf.reduce_sum(tf.dtypes.cast(x=positive_indices, dtype=tf.int32))
             assigned_annotations = box_annotation[iou_argmax, :]
 
-            targets[positive_indices, :] = 0
-            targets[positive_indices, assigned_annotations[positive_indices, 4].astype(np.int)] = 1
+            targets = item_assignment(input_tensor=targets,
+                                      boolean_mask=positive_indices,
+                                      value=0,
+                                      axes=[1])
 
-            alpha_factor = np.ones_like(targets) * self.alpha
-            alpha_factor = np.where(np.equal(targets, 1.), alpha_factor, 1. - alpha_factor)
-            focal_weight = np.where(np.equal(targets, 1.), 1. - class_result, class_result)
-            focal_weight = alpha_factor * np.power(focal_weight, self.gamma)
-            bce = -(targets * np.log(class_result) + (1.0 - targets) * np.log(1.0 - class_result))
+            targets_numpy = targets.numpy()
+            targets_numpy[positive_indices, assigned_annotations[positive_indices, 4].astype(np.int)] = 1
+            targets = tf.convert_to_tensor(targets_numpy, dtype=tf.float32)
+
+
+            alpha_factor = tf.ones_like(targets) * self.alpha
+            alpha_factor = tf.where(tf.math.equal(targets, 1.), alpha_factor, 1. - alpha_factor)
+            focal_weight = tf.where(tf.math.equal(targets, 1.), 1. - class_result, class_result)
+            focal_weight = alpha_factor * tf.math.pow(focal_weight, self.gamma)
+            bce = -(targets * tf.math.log(class_result) + (1.0 - targets) * tf.math.log(1.0 - class_result))
 
             cls_loss = focal_weight * bce
-            cls_loss = np.where(np.not_equal(targets, -1.0), cls_loss, np.zeros_like(cls_loss))
-            cls_loss_list.append(np.sum(cls_loss) / np.clip(a=num_positive_anchors.astype(np.float32), a_min=1.0, a_max=None))
+            cls_loss = tf.where(tf.math.not_equal(targets, -1.0), cls_loss, tf.zeros_like(cls_loss))
+            cls_loss_list.append(tf.math.reduce_sum(cls_loss) / tf.keras.backend.clip(x=tf.cast(num_positive_anchors, dtype=tf.float32), min_value=1.0, max_value=None))
 
-            if np.sum(positive_indices) > 0:
+            if num_positive_anchors > 0:
                 assigned_annotations = assigned_annotations[positive_indices, :]
 
                 anchor_widths_pi = anchor_widths[positive_indices]
@@ -71,24 +84,24 @@ class FocalLoss:
                 gt_heights = assigned_annotations[:, 3] - assigned_annotations[:, 1]
                 gt_center_x = assigned_annotations[:, 0] + 0.5 * gt_widths
                 gt_center_y = assigned_annotations[:, 1] + 0.5 * gt_heights
-                gt_widths = np.clip(a=gt_widths, a_min=1, a_max=None)
-                gt_heights = np.clip(a=gt_heights, a_min=1, a_max=None)
+                gt_widths = tf.keras.backend.clip(x=gt_widths, min_value=1, max_value=None)
+                gt_heights = tf.keras.backend.clip(x=gt_heights, min_value=1, max_value=None)
 
                 targets_dx = (gt_center_x - anchor_center_x_pi) / anchor_widths_pi
                 targets_dy = (gt_center_y - anchor_center_y_pi) / anchor_heights_pi
-                targets_dw = np.log(gt_widths / anchor_widths_pi)
-                targets_dh = np.log(gt_heights / anchor_heights_pi)
-                targets = np.stack([targets_dx, targets_dy, targets_dw, targets_dh])
-                targets = targets.transpose()
-                targets = targets / np.array([[0.1, 0.1, 0.2, 0.2]])
+                targets_dw = tf.math.log(gt_widths / anchor_widths_pi)
+                targets_dh = tf.math.log(gt_heights / anchor_heights_pi)
+                targets = tf.stack([targets_dx, targets_dy, targets_dw, targets_dh])
+                targets = tf.transpose(a=targets, perm=[1, 0])
+                targets = targets / tf.constant([[0.1, 0.1, 0.2, 0.2]])
 
-                reg_diff = np.abs(targets - reg_result[positive_indices, :])
-                reg_loss = np.where(np.less_equal(reg_diff, 1.0 / 9.0), 0.5 * 9.0 * np.power(reg_diff, 2), reg_diff - 0.5 / 9.0)
-                reg_loss_list.append(np.mean(reg_loss))
+                reg_diff = tf.math.abs(targets - reg_result[positive_indices, :])
+                reg_loss = tf.where(tf.math.less_equal(reg_diff, 1.0 / 9.0), 0.5 * 9.0 * tf.math.pow(reg_diff, 2), reg_diff - 0.5 / 9.0)
+                reg_loss_list.append(tf.reduce_mean(reg_loss))
             else:
-                reg_loss_list.append(np.array(0).astype(np.float32))
+                reg_loss_list.append(tf.constant(0, dtype=tf.float32))
 
-        final_cls_loss = np.mean(np.stack(cls_loss_list, axis=0), axis=0, keepdims=True)
-        final_reg_loss = np.mean(np.stack(reg_loss_list, axis=0), axis=0, keepdims=True)
+        final_cls_loss = tf.math.reduce_mean(tf.stack(cls_loss_list, axis=0), axis=0, keepdims=True)
+        final_reg_loss = tf.math.reduce_mean(tf.stack(reg_loss_list, axis=0), axis=0, keepdims=True)
 
         return final_cls_loss, final_reg_loss
