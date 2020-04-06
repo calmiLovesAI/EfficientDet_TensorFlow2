@@ -95,7 +95,7 @@ class FocalLoss:
                 targets = tf.transpose(a=targets, perm=[1, 0])
                 targets = targets / tf.constant([[0.1, 0.1, 0.2, 0.2]])
 
-                reg_diff = tf.math.abs(targets - reg_result[positive_indices, :])
+                reg_diff = tf.math.abs(targets - tf.boolean_mask(reg_result, positive_indices, axis=0))
                 reg_loss = tf.where(tf.math.less_equal(reg_diff, 1.0 / 9.0), 0.5 * 9.0 * tf.math.pow(reg_diff, 2), reg_diff - 0.5 / 9.0)
                 reg_loss_list.append(tf.reduce_mean(reg_loss))
             else:
