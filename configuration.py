@@ -30,6 +30,11 @@ class Config:
     # box/class layers
     d_class = {"D0": 3, "D1": 3, "D2": 3, "D3": 4, "D4": 4, "D5": 4, "D6": 5, "D7": 5}
 
+    # nms
+    score_threshold = 0.01
+    iou_threshold = 0.5
+    max_box_num = 100
+
     # dataset
     num_classes = 20
     pascal_voc_root = "./data/datasets/VOCdevkit/VOC2012/"
@@ -40,6 +45,9 @@ class Config:
                           "pottedplant": 17, "sofa": 18, "tvmonitor": 19}
     max_boxes_per_image = 20
     resize_mode = "RESIZE"
+
+    # test image
+    test_image_dir = "test_pictures/2007_000032.jpg"
 
     # txt file
     txt_file_dir = "data.txt"
