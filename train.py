@@ -4,6 +4,7 @@ import tensorflow as tf
 from core.efficientdet import EfficientDet, PostProcessing
 from data.dataloader import DetectionDataset, DataLoader
 from configuration import Config
+from utils.visualize import visualize_training_results
 
 
 def print_model_summary(network):
@@ -69,5 +70,8 @@ if __name__ == '__main__':
 
         if epoch % Config.save_frequency == 0:
             efficientdet.save_weights(filepath=Config.save_model_dir+"epoch-{}".format(epoch), save_format="tf")
+
+        if Config.test_images_during_training:
+            visualize_training_results(pictures=Config.test_images_dir_list, model=efficientdet, epoch=epoch)
 
     efficientdet.save_weights(filepath=Config.save_model_dir + "saved_model", save_format="tf")

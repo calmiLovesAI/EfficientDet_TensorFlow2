@@ -11,6 +11,10 @@ class Config:
     load_weights_from_epoch = 0
     save_frequency = 5
 
+    test_images_during_training = False
+    training_results_save_dir = "./test_pictures/"
+    test_images_dir_list = ["", ""]
+
     network_type = "D0"
 
     # image size: (height, width)
