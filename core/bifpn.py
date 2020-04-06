@@ -116,7 +116,8 @@ class WeightedFeatureFusion(tf.keras.layers.Layer):
     def build(self, input_shape):
         self.num_features = len(input_shape)
         assert self.num_features >= 2
-        self.fusion_weights = self.add_weight(shape=(self.num_features, ),
+        self.fusion_weights = self.add_weight(name="fusion_w",
+                                              shape=(self.num_features, ),
                                               dtype=tf.dtypes.float32,
                                               initializer=tf.constant_initializer(value=1.0 / self.num_features),
                                               trainable=True)
