@@ -48,9 +48,6 @@ class FocalLoss:
             #                           boolean_mask=tf.math.less(iou_max, 0.4),
             #                           value=0,
             #                           axes=[1])
-            targets_numpy = targets.numpy()
-            targets_numpy[np.less(iou_max.numpy(), 0.4), :] = 0
-            targets = tf.convert_to_tensor(targets_numpy, dtype=tf.float32)
 
             positive_indices = tf.math.greater(iou_max, 0.5)
             num_positive_anchors = tf.reduce_sum(tf.dtypes.cast(x=positive_indices, dtype=tf.int32))
@@ -61,10 +58,8 @@ class FocalLoss:
             #                           value=0,
             #                           axes=[1])
             targets_numpy = targets.numpy()
+            targets_numpy[np.less(iou_max.numpy(), 0.4), :] = 0
             targets_numpy[np.greater(iou_max.numpy(), 0.5), :] = 0
-            targets = tf.convert_to_tensor(targets_numpy, dtype=tf.float32)
-
-            targets_numpy = targets.numpy()
             targets_numpy[positive_indices, assigned_annotations[positive_indices, 4].astype(np.int)] = 1
             targets = tf.convert_to_tensor(targets_numpy, dtype=tf.float32)
 
