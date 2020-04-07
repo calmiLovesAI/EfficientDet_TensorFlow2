@@ -47,9 +47,10 @@ class PostProcessing:
         loss_value = tf.math.reduce_mean(cls_loss_value) + tf.reduce_mean(reg_loss_value)
         return loss_value
 
-    def testing_procedure(self, efficientdet_ouputs):
+    def testing_procedure(self, efficientdet_ouputs, input_image_size):
         box_transform = BoxTransform()
         clip_boxes = ClipBoxes()
+        map_to_original = MapToInputImage(input_image_size)
         nms = NMS()
 
         anchors = self.anchors(efficientdet_ouputs)
@@ -57,7 +58,7 @@ class PostProcessing:
 
         transformed_anchors = box_transform(anchors, reg_results)
         transformed_anchors = clip_boxes(transformed_anchors)
-        transformed_anchors = tf.transpose(a=transformed_anchors, perm=[0, 2, 1])
+        transformed_anchors = map_to_original(transformed_anchors)
         scores = tf.math.reduce_max(cls_results, axis=2).numpy()
         classes = tf.math.argmax(cls_results, axis=2).numpy()
         final_boxes, final_scores, final_classes = nms(boxes=transformed_anchors[0, :, :],
@@ -71,9 +72,9 @@ class BoxTransform:
 
     def __call__(self, boxes, deltas, *args, **kwargs):
         deltas = deltas.numpy()
-        widths = boxes[:, :, 2] - boxes[:, :, 0]  # (1, 59904)
+        widths = boxes[:, :, 2] - boxes[:, :, 0]
         heights = boxes[:, :, 3] - boxes[:, :, 1]
-        center_x = boxes[:, :, 0] + 0.5 * widths  # (1, 59904)
+        center_x = boxes[:, :, 0] + 0.5 * widths
         center_y = boxes[:, :, 1] + 0.5 * heights
 
         dx = deltas[:, :, 0] * 0.1
@@ -91,7 +92,7 @@ class BoxTransform:
         pred_boxes_x2 = pred_center_x + 0.5 * pred_w
         pred_boxes_y2 = pred_center_y + 0.5 * pred_h
 
-        pred_boxes = np.stack([pred_boxes_x1, pred_boxes_y1, pred_boxes_x2, pred_boxes_y2], axis=1) #(1, 4, 59904)
+        pred_boxes = np.stack([pred_boxes_x1, pred_boxes_y1, pred_boxes_x2, pred_boxes_y2], axis=2)
 
         return pred_boxes
 
@@ -105,4 +106,18 @@ class ClipBoxes:
         boxes[:, :, 1] = np.clip(a=boxes[:, :, 1], a_min=0, a_max=None)
         boxes[:, :, 2] = np.clip(a=boxes[:, :, 2], a_min=self.width, a_max=None)
         boxes[:, :, 3] = np.clip(a=boxes[:, :, 3], a_min=self.height, a_max=None)
+        return boxes
+
+
+class MapToInputImage:
+    def __init__(self, input_image_size):
+        self.h, self.w = input_image_size
+        self.x_ratio = self.w / Config.get_image_size()[1]
+        self.y_ratio = self.h / Config.get_image_size()[0]
+
+    def __call__(self, boxes, *args, **kwargs):
+        boxes[:, :, 0] = boxes[:, :, 0] * self.x_ratio
+        boxes[:, :, 1] = boxes[:, :, 1] * self.y_ratio
+        boxes[:, :, 2] = boxes[:, :, 2] * self.x_ratio
+        boxes[:, :, 3] = boxes[:, :, 3] * self.y_ratio
         return boxes

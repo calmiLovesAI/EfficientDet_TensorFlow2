@@ -51,7 +51,7 @@ class Config:
     resize_mode = "RESIZE"
 
     # test image
-    test_image_dir = "test_pictures/2007_000032.jpg"
+    test_image_dir = ""
 
     # txt file
     txt_file_dir = "data.txt"

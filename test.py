@@ -21,13 +21,14 @@ def draw_boxes_on_image(image, boxes, scores, classes):
 
 
 def test_single_picture(picture_dir, model):
+    image_array = cv2.imread(picture_dir)
     image = DataLoader.image_preprocess(is_training=False, image_dir=picture_dir)
     image = tf.expand_dims(input=image, axis=0)
 
     outputs = model(image, training=False)
     post_process = PostProcessing()
-    boxes, scores, classes = post_process.testing_procedure(outputs)
-    image_with_boxes = draw_boxes_on_image(cv2.imread(picture_dir), boxes.astype(np.int), scores, classes)
+    boxes, scores, classes = post_process.testing_procedure(outputs, [image_array.shape[0], image_array.shape[1]])
+    image_with_boxes = draw_boxes_on_image(image_array, boxes.astype(np.int), scores, classes)
     return image_with_boxes
 
 
