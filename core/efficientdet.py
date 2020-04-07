@@ -77,10 +77,10 @@ class BoxTransform:
         center_x = boxes[:, :, 0] + 0.5 * widths
         center_y = boxes[:, :, 1] + 0.5 * heights
 
-        dx = deltas[:, :, 0]
-        dy = deltas[:, :, 1]
-        dw = deltas[:, :, 2]
-        dh = deltas[:, :, 3]
+        dx = deltas[:, :, 0] * 0.1
+        dy = deltas[:, :, 1] * 0.1
+        dw = deltas[:, :, 2] * 0.2
+        dh = deltas[:, :, 3] * 0.2
 
         pred_center_x = center_x + dx * widths
         pred_center_y = center_y + dy * heights
