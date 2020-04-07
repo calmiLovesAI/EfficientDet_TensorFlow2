@@ -1,9 +1,8 @@
 import tensorflow as tf
-import numpy as np
 
 from utils.iou import IOU
 from configuration import Config
-from utils.tools import item_assignment
+from utils.tools import item_assignment, advanced_item_assignmnet
 
 
 class FocalLoss:
@@ -44,24 +43,25 @@ class FocalLoss:
             iou_argmax = tf.math.argmax(iou_value, axis=1)
 
             targets = tf.ones_like(class_result) * -1
-            # targets = item_assignment(input_tensor=targets,
-            #                           boolean_mask=tf.math.less(iou_max, 0.4),
-            #                           value=0,
-            #                           axes=[1])
+            targets = item_assignment(input_tensor=targets,
+                                      boolean_mask=tf.math.less(iou_max, 0.4),
+                                      value=0,
+                                      axes=[1])
 
             positive_indices = tf.math.greater(iou_max, 0.5)
             num_positive_anchors = tf.reduce_sum(tf.dtypes.cast(x=positive_indices, dtype=tf.int32))
             assigned_annotations = box_annotation[iou_argmax, :]
 
-            # targets = item_assignment(input_tensor=targets,
-            #                           boolean_mask=positive_indices,
-            #                           value=0,
-            #                           axes=[1])
-            targets_numpy = targets.numpy()
-            targets_numpy[np.less(iou_max.numpy(), 0.4), :] = 0
-            targets_numpy[np.greater(iou_max.numpy(), 0.5), :] = 0
-            targets_numpy[positive_indices, assigned_annotations[positive_indices, 4].astype(np.int)] = 1
-            targets = tf.convert_to_tensor(targets_numpy, dtype=tf.float32)
+            targets = item_assignment(input_tensor=targets,
+                                      boolean_mask=positive_indices,
+                                      value=0,
+                                      axes=[1])
+
+            targets = advanced_item_assignmnet(input_tensor=targets,
+                                               boolean_mask=positive_indices,
+                                               value=1,
+                                               target_elements=tf.convert_to_tensor(assigned_annotations[:, 4], dtype=tf.float32),
+                                               elements_axis=1)
 
             alpha_factor = tf.ones_like(targets) * self.alpha
             alpha_factor = tf.where(tf.math.equal(targets, 1.), alpha_factor, 1. - alpha_factor)
