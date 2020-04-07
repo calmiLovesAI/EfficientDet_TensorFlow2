@@ -77,10 +77,10 @@ class BoxTransform:
         center_x = boxes[:, :, 0] + 0.5 * widths
         center_y = boxes[:, :, 1] + 0.5 * heights
 
-        dx = deltas[:, :, 0] * 0.1
-        dy = deltas[:, :, 1] * 0.1
-        dw = deltas[:, :, 2] * 0.2
-        dh = deltas[:, :, 3] * 0.2
+        dx = deltas[:, :, 0]
+        dy = deltas[:, :, 1]
+        dw = deltas[:, :, 2]
+        dh = deltas[:, :, 3]
 
         pred_center_x = center_x + dx * widths
         pred_center_y = center_y + dy * heights
@@ -102,10 +102,10 @@ class ClipBoxes:
         self.height, self.width = Config.get_image_size()[0], Config.get_image_size()[1]
 
     def __call__(self, boxes, *args, **kwargs):
-        boxes[:, :, 0] = np.clip(a=boxes[:, :, 0], a_min=0, a_max=None)
-        boxes[:, :, 1] = np.clip(a=boxes[:, :, 1], a_min=0, a_max=None)
-        boxes[:, :, 2] = np.clip(a=boxes[:, :, 2], a_min=self.width, a_max=None)
-        boxes[:, :, 3] = np.clip(a=boxes[:, :, 3], a_min=self.height, a_max=None)
+        boxes[:, :, 0] = np.clip(a=boxes[:, :, 0], a_min=0, a_max=self.width - 1)
+        boxes[:, :, 1] = np.clip(a=boxes[:, :, 1], a_min=0, a_max=self.height - 1)
+        boxes[:, :, 2] = np.clip(a=boxes[:, :, 2], a_min=0, a_max=self.width - 1)
+        boxes[:, :, 3] = np.clip(a=boxes[:, :, 3], a_min=0, a_max=self.height - 1)
         return boxes
 
 
