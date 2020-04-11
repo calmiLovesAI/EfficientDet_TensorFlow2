@@ -41,7 +41,7 @@ class PostProcessing:
         self.loss = FocalLoss()
 
     def training_procedure(self, efficientdet_ouputs, labels):
-        anchors = self.anchors(efficientdet_ouputs)
+        anchors = self.anchors()
         reg_results, cls_results = efficientdet_ouputs[..., :4], efficientdet_ouputs[..., 4:]
         cls_loss_value, reg_loss_value = self.loss(cls_results, reg_results, anchors, labels)
         loss_value = tf.math.reduce_mean(cls_loss_value) + tf.reduce_mean(reg_loss_value)
