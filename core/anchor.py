@@ -3,17 +3,17 @@ from configuration import Config
 
 
 class Anchors:
-    def __init__(self, scales, ratios, image_size, levels=5):
+    def __init__(self, scales, ratios, levels=5):
         self.scales = np.array(scales)
         self.ratios = np.array(ratios)
-        self.image_size = np.array(image_size)
         self.levels = levels
         self.num_anchors = Config.num_anchor_per_pixel
-        self.sizes = Config.downsampling_strides
-        self.strides = self.sizes
+        self.sizes = Config.sizes
+        self.strides = Config.downsampling_strides
 
-    def __call__(self, *args, **kwargs):
-        image_shapes = [(self.image_size + s - 1) // s for s in self.sizes]
+    def __call__(self, image_size, *args, **kwargs):
+        image_size = np.array(image_size)
+        image_shapes = [(image_size + s - 1) // s for s in self.strides]
 
         all_anchors = np.zeros((0, 4)).astype(np.float32)
 

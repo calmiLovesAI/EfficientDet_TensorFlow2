@@ -60,7 +60,8 @@ class Config:
     num_anchor_per_pixel = 9
     ratios = [0.5, 1, 2]
     scales = [2 ** 0, 2 ** (1.0 / 3.0), 2 ** (2.0 / 3.0)]
-    downsampling_strides = [8, 16, 16, 32, 32]
+    downsampling_strides = [8, 16, 32, 64, 128]
+    sizes = [32, 64, 128, 256, 512]
 
     # focal loss
     alpha = 0.25

@@ -42,8 +42,12 @@ class BiFPNModule(tf.keras.layers.Layer):
             self.w_fusion_list.append(WeightedFeatureFusion(out_channels))
         self.upsampling_1 = tf.keras.layers.UpSampling2D(size=(2, 2))
         self.upsampling_2 = tf.keras.layers.UpSampling2D(size=(2, 2))
+        self.upsampling_3 = tf.keras.layers.UpSampling2D(size=(2, 2))
+        self.upsampling_4 = tf.keras.layers.UpSampling2D(size=(2, 2))
         self.maxpool_1 = tf.keras.layers.MaxPool2D(pool_size=(2, 2))
         self.maxpool_2 = tf.keras.layers.MaxPool2D(pool_size=(2, 2))
+        self.maxpool_3 = tf.keras.layers.MaxPool2D(pool_size=(2, 2))
+        self.maxpool_4 = tf.keras.layers.MaxPool2D(pool_size=(2, 2))
 
     def call(self, inputs, training=None, **kwargs):
         """
@@ -54,15 +58,15 @@ class BiFPNModule(tf.keras.layers.Layer):
         """
         assert len(inputs) == 5
         f3, f4, f5, f6, f7 = inputs
-        f6_d = self.w_fusion_list[0]([f6, f7], training=training)
-        f5_d = self.w_fusion_list[1]([f5, self.upsampling_1(f6_d)], training=training)
-        f4_d = self.w_fusion_list[2]([f4, f5_d], training=training)
+        f6_d = self.w_fusion_list[0]([f6, self.upsampling_1(f7)], training=training)
+        f5_d = self.w_fusion_list[1]([f5, self.upsampling_2(f6_d)], training=training)
+        f4_d = self.w_fusion_list[2]([f4, self.upsampling_3(f5_d)], training=training)
 
-        f3_u = self.w_fusion_list[3]([f3, self.upsampling_2(f4_d)], training=training)
+        f3_u = self.w_fusion_list[3]([f3, self.upsampling_4(f4_d)], training=training)
         f4_u = self.w_fusion_list[4]([f4, f4_d, self.maxpool_1(f3_u)], training=training)
-        f5_u = self.w_fusion_list[5]([f5, f5_d, f4_u], training=training)
-        f6_u = self.w_fusion_list[6]([f6, f6_d, self.maxpool_2(f5_u)], training=training)
-        f7_u = self.w_fusion_list[7]([f7, f6_u], training=training)
+        f5_u = self.w_fusion_list[5]([f5, f5_d, self.maxpool_2(f4_u)], training=training)
+        f6_u = self.w_fusion_list[6]([f6, f6_d, self.maxpool_3(f5_u)], training=training)
+        f7_u = self.w_fusion_list[7]([f7, self.maxpool_4(f6_u)], training=training)
 
         return [f3_u, f4_u, f5_u, f6_u, f7_u]
 
