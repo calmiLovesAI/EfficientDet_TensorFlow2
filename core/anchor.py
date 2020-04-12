@@ -19,7 +19,7 @@ class Anchors:
 
         for i in range(self.levels):
             anchors = self.__generate_anchors(size=self.sizes[i])   # shape: (self.num_anchors, 4)
-            shifted_anchors = self.__shift(shape=image_shapes[i], stride=self.strides[i], anchors=anchors)
+            shifted_anchors = Anchors.__shift(shape=image_shapes[i], stride=self.strides[i], anchors=anchors)
             all_anchors = np.append(all_anchors, shifted_anchors, axis=0)
         all_anchors = np.expand_dims(all_anchors, axis=0)   # shape : (1, N, 4)
         return all_anchors.astype(np.float32)
@@ -42,7 +42,8 @@ class Anchors:
 
         return anchors
 
-    def __shift(self, shape, stride, anchors):
+    @staticmethod
+    def __shift(shape, stride, anchors):
         shift_x = (np.arange(0, shape[1]) + 0.5) * stride
         shift_y = (np.arange(0, shape[0]) + 0.5) * stride
 
