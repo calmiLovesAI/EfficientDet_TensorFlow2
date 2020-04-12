@@ -53,7 +53,7 @@ class PostProcessing:
         map_to_original = MapToInputImage(input_image_size)
         nms = NMS()
 
-        anchors = self.anchors(efficientdet_ouputs)
+        anchors = self.anchors(image_size=Config.get_image_size())
         reg_results, cls_results = efficientdet_ouputs[..., :4], efficientdet_ouputs[..., 4:]
 
         transformed_anchors = box_transform(anchors, reg_results)

@@ -61,11 +61,11 @@ if __name__ == '__main__':
         for step, batch_data in enumerate(train_data):
             images, labels = data_loader.read_batch_data(batch_data)
             train_step(images, labels)
-            print("Epoch: {}/{}, step: {}/{}, loss: {:.5f}".format(epoch,
-                                                                   Config.epochs,
-                                                                   step,
-                                                                   steps_per_epoch,
-                                                                   loss_metric.result()))
+            print("Epoch: {}/{}, step: {}/{}, loss: {}".format(epoch,
+                                                               Config.epochs,
+                                                               step,
+                                                               steps_per_epoch,
+                                                               loss_metric.result()))
         loss_metric.reset_states()
 
         if epoch % Config.save_frequency == 0:
