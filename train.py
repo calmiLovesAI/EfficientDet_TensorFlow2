@@ -40,7 +40,7 @@ if __name__ == '__main__':
     post_process = PostProcessing()
 
     # optimizer
-    lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=1e-3,
+    lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=1e-4,
                                                                  decay_steps=steps_per_epoch * Config.learning_rate_decay_epochs,
                                                                  decay_rate=0.96)
     optimizer = tf.keras.optimizers.Adam(learning_rate=lr_schedule)

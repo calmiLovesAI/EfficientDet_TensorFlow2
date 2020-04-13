@@ -3,7 +3,7 @@
 class Config:
     epochs = 50
     batch_size = 8
-    learning_rate_decay_epochs = 20
+    learning_rate_decay_epochs = 10
 
     # save model
     save_model_dir = "saved_model/"
