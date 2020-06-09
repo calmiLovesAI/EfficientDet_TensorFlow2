@@ -1,14 +1,14 @@
 import numpy as np
 
 
-class IOU(object):
+class IOU:
     def __init__(self, box_1, box_2):
         self.box_1 = np.expand_dims(box_1, axis=1)
         self.box_2 = np.expand_dims(box_2, axis=0)
 
     @staticmethod
     def __get_box_area(box):
-        return box[..., 2] * box[..., 3]
+        return (box[..., 2] - box[..., 0]) * (box[..., 3] - box[..., 1])
 
     def calculate_iou(self):
         box_1_area = self.__get_box_area(self.box_1)
